@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <bluefishv><!--2020/11/28--></bluefishv>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreateCircle</title>
+</head>
+<style>
+    /**{margin: 0;}*/
+    /**{position: absolute;}*/
+    html,
+    body {
+        height: 100%;
+        width: 100%;
+        perspective: 700px;
+    }
+
+    #wbk {
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        background: transparent;
+        border: 1px solid #ccccff;
+    }
+
+    #circle {
+        background: #accdf9;
+        position: absolute;
+        top: 250px;
+        left: 250px;
+        border: 10px solid #5ba8e1;
+
+    }
+
+    #circle>p {
+        position: absolute;
+    }
+
+    .button {
+        border-radius: 10px;
+        position: relative;
+        background-color: #97ebee;
+        border: none;
+        font-size: 18px;
+        color: #FFFFFF;
+        padding: 20px;
+        width: 100px;
+        text-align: center;
+        -webkit-transition-duration: 0.4s;
+        /* Safari */
+        transition-duration: 0.4s;
+        text-decoration: none;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .button:after {
+        content: "";
+        background: #90e8ee;
+        display: block;
+        position: absolute;
+        padding-top: 300%;
+        padding-left: 350%;
+        margin-left: -20px !important;
+        margin-top: -120%;
+        opacity: 0;
+        transition: all 0.8s
+    }
+
+    .button:active:after {
+        padding: 0;
+        margin: 0;
+        opacity: 1;
+        transition: 0s
+    }
+</style>
+
+<body>
+    <font color="#7bc0e9" id="x">&#160;设置半径</font>
+    <INPUT name="r" TYPE="text" size="25"
+        onmouseover="this.style.borderColor='black';this.style.backgroundColor='#dddddd'" style="width: 106; height: 21"
+        onmouseout="this.style.borderColor='#ccccff';this.style.background='transparent'" id="wbk" value=""
+        placeholder="请输入半径(int)">
+    <button onClick="setR()" class="button" style="padding: 5px;">save</button>
+    <p></p><font color="#7bc0e9" id="x">&#160;设置字符</font>
+    <INPUT name="mark" TYPE="text" size="25"
+        onmouseover="this.style.borderColor='black';this.style.backgroundColor='#dddddd'" style="width: 106; height: 21"
+        onmouseout="this.style.borderColor='#ccccff';this.style.background='transparent'" id="wbk" value='■'
+        placeholder="请输入符号(string)">
+    <button onClick="setMark()" class="button" style="padding: 5px;">save</button>
+    <p></p><font color="#7bc0e9" id="x">&#160;top(px)</font>
+    <INPUT name="top" TYPE="text" size="25"
+        onmouseover="this.style.borderColor='black';this.style.backgroundColor='#dddddd'" style="width: 106; height: 21"
+        onmouseout="this.style.borderColor='#ccccff';this.style.background='transparent'" id="wbk" value='270'
+        placeholder="请输入top属性(px)">
+    <button onClick="setTop()" class="button" style="padding: 5px;">save</button>
+    <p></p><font color="#7bc0e9" id="x">&#160;left(px)</font>
+    <INPUT name="left" TYPE="text" size="25"
+        onmouseover="this.style.borderColor='black';this.style.backgroundColor='#dddddd'" style="width: 106; height: 21"
+        onmouseout="this.style.borderColor='#ccccff';this.style.background='transparent'" id="wbk" value='270'
+        placeholder="请输入left属性(px)">
+    <button onClick="setLeft()" class="button" style="padding: 5px;">save</button>
+    <p></p><font color="#7bc0e9" id="x">&#160;space(int)</font>
+    <INPUT name="space" TYPE="text" size="25"
+        onmouseover="this.style.borderColor='black';this.style.backgroundColor='#dddddd'" style="width: 106; height: 21"
+        onmouseout="this.style.borderColor='#ccccff';this.style.background='transparent'" id="wbk" value='10'
+        placeholder="请输入字符间距(int)">
+    <button onClick="setSpace()" class="button" style="padding: 5px;">save</button>
+    <p></p>
+    <button onClick="createCircle()" class="button" style="width: 150px;">CreateCircle</button>
+    <p></p>
+    <button onClick="removeCircle()" class="button" style="width: 150px;">removeAll</button>
+    <p></p>
+    <button onClick="removeMark()" class="button" style="width: 150px;">removeMark(5)</button>
+    <p></p>
+    <button onClick="AutoSave()" class="button" style="width: 150px;" name="as">自动保存:off</button>
+    <p></p>
+    <font color="#7bc0e9" id="x">圆半径:</font><p name="viewR"></p>
+    <font color="#7bc0e9" id="x">字符:</font><p name="viewMark"></p>
+    <font color="#7bc0e9" id="x">顶部:</font><p name="viewTop"></p>
+    <font color="#7bc0e9" id="x">左边距:</font><p name="viewLeft"></p>
+    <font color="#7bc0e9" id="x">符号间距:</font><p name="viewSpace"></p>
+    <font color="#7bc0e9" id="x">子标签:</font><p name="viewChild"></p>
+    <font color="#7bc0e9" id="x">&#160;(for循环次数)</font><p name="cons">0<p>
+    <div id="circle" name="circle" style="width:600px;height:600px;border: 10px solid #5ba8e1;">circle</div>
+</body>
+<script>
+    var circle = document.getElementsByName("circle")[0];
+    var cons = document.getElementsByName("cons")[0];
+    var consr = 0;
+    var r = 0;
+    var mark="■";
+    var top_=270,left_=270;
+    var space=10;
+    var chi=0;
+    var save=false;
+    var interval_;
+    window.setInterval(reload,500);
+    function AutoSave(){
+        var as=document.getElementsByName("as")[0];
+        if(save==false){
+            save=true;
+            as.innerHTML="自动保存:on"
+            interval_=window.setInterval(SaveAll,1000);
+        }else{
+            save=false;
+            as.innerHTML="自动保存:off"
+            clearInterval(interval_);
+        }
+    }
+    function SaveAll(){
+        setR();
+        setLeft();
+        setTop();
+        setMark();
+        setSpace();
+    }
+    function reload(){
+        if(r==0){
+            document.getElementsByName("viewR")[0].innerHTML="NaN";
+        }else{
+            document.getElementsByName("viewR")[0].innerHTML=r;
+        }
+        
+        document.getElementsByName("viewMark")[0].innerHTML=mark;
+        document.getElementsByName("viewTop")[0].innerHTML=top_;
+        document.getElementsByName("viewLeft")[0].innerHTML=left_;
+        document.getElementsByName("viewSpace")[0].innerHTML=space;
+        document.getElementsByName("viewChild")[0].innerHTML=chi;
+        
+    }
+    function setR() {
+        var wbk = document.getElementsByName("r")[0].value;
+        var wbkint = parseInt(wbk);
+        if (isNaN(wbkint)) {
+            alert("NaN不是有效半径");
+        } else {
+            r = wbkint;
+        }
+        
+    }
+    function setMark() {
+        mark= document.getElementsByName("mark")[0].value;
+    }
+    function setTop(){
+        var wbk=parseInt(document.getElementsByName("top")[0].value);
+        if(isNaN(wbk)){
+            alert("请输入有效数字");
+        }else{
+        top=document.getElementsByName("top")[0].value+"px";
+        }
+    }
+    function setLeft(){
+        var wbk=parseInt(document.getElementsByName("left")[0].value);
+        if(isNaN(wbk)){
+            alert("请输入有效数字");
+        }else{
+        top=document.getElementsByName("left")[0].value+"px";
+        }
+    }
+    function setSpace(){
+        var wbk=parseInt(document.getElementsByName("space")[0].value);
+        if(isNaN(wbk)){
+            alert("请输入有效数字");
+        }else{
+        space=parseInt(document.getElementsByName("space")[0].value);
+        }
+    }
+    function removeCircle(){
+        consr=0;
+        for(var i=0;i<chi*3;i++){
+        circle.removeChild(circle.firstChild);
+        cons.innerHTML = consr;
+        chi--;
+        }
+    }
+    function removeMark(){
+        consr=0;
+        for(var i=0;i<5;i++){
+        circle.removeChild(circle.firstChild);
+        cons.innerHTML = consr;
+        chi--;
+        }
+        
+    }
+    function createCircle() {
+
+        var basic = r * 1;
+        if(basic==0){
+            alert("请先设置并保存半径")
+        }
+        var x = top_;
+        var y = left_;
+        var b2 = basic * basic;
+        var cX = 0;
+        //cons.innerHTML=consr;
+        for (var i = 0; i < basic; i++) {
+            if (cX != 0) {
+                var res = b2 - (cX * cX);
+            }
+            else { var res = 0; }
+            var ry = Math.sqrt(res);
+            //console.log(res);
+            if (res < 0) {
+                break;
+            } else {
+                var c = document.createElement("p");
+                c.innerHTML = mark;
+                c.style.left = x + cX + "px";
+                c.style.top = y + ry + "px";
+                circle.appendChild(c);
+                var d = document.createElement("p");
+                d.innerHTML = mark;
+                d.style.left = x + -1 * cX + "px";
+                d.style.top = y + ry + "px";
+                circle.appendChild(d);
+                var e = document.createElement("p");
+                e.innerHTML = mark;
+                e.style.left = x + cX + "px";
+                e.style.top = y + -1 * ry + "px";
+                circle.appendChild(e);
+                var f = document.createElement("p");
+                f.innerHTML = mark;
+                f.style.left = x + -1 * cX + "px";
+                f.style.top = y + -1 * ry + "px";
+                circle.appendChild(f);
+
+                var c1 = document.createElement("p");
+                c1.innerHTML = mark;
+                c1.style.top = x + cX + "px";
+                c1.style.left = y + ry + "px";
+                circle.appendChild(c1);
+                var d1 = document.createElement("p");
+                d1.innerHTML = mark;
+                d1.style.top = x + -1 * cX + "px";
+                d1.style.left = y + ry + "px";
+                circle.appendChild(d1);
+                var e1 = document.createElement("p");
+                e1.innerHTML = mark;
+                e1.style.top = x + cX + "px";
+                e1.style.left = y + -1 * ry + "px";
+                circle.appendChild(e1);
+                var f1 = document.createElement("p");
+                f1.innerHTML = mark;
+                f1.style.top = x + -1 * cX + "px";
+                f1.style.left = y + -1 * ry + "px";
+                circle.appendChild(f1);
+                cX += space;//间距
+                chi+=8;
+            }
+            consr++;
+            cons.innerHTML = consr;
+        }
+    }
+    //new createCircle();
+</script>
+
+</html>
